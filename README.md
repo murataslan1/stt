@@ -1,138 +1,297 @@
 # STT — Speech to Text
 
-System-wide voice dictation for macOS, Windows, and Linux. Double-tap a modifier key, talk, tap once to paste the transcription wherever your cursor is.
+> **Double-tap a key. Talk. Tap once. Your words appear.**
 
-Powered by [Groq](https://console.groq.com/keys)'s Whisper API (fast, free tier) with a local MLX Whisper fallback on Apple Silicon.
+System-wide voice dictation for **macOS**, **Windows**, and **Linux**. No cloud lock-in — uses [Groq](https://console.groq.com/keys)'s free Whisper API (or fully offline MLX Whisper on Apple Silicon).
 
-![platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey) ![license](https://img.shields.io/badge/license-MIT-blue)
+![platform](https://img.shields.io/badge/macOS-supported-black?logo=apple) ![platform](https://img.shields.io/badge/Windows-supported-0078D4?logo=windows) ![platform](https://img.shields.io/badge/Linux-supported-FCC624?logo=linux&logoColor=black) ![license](https://img.shields.io/badge/license-MIT-blue)
 
-## How it works
+---
 
-- **macOS**: double-tap ⌘ to start recording, single-tap ⌘ to stop and paste.
-- **Windows**: double-tap Ctrl to start, single-tap Ctrl to stop and paste.
-- **Linux**: double-tap Ctrl to start, single-tap Ctrl to stop and paste. (X11 recommended — Wayland has caveats, see below.)
+## How it feels
 
-A thin bar animates at the bottom of your screen while it listens. As you speak it streams live transcription; when you stop, the final polished text is pasted at the cursor in whichever app you were in.
+You're typing in any app. Hands on the keyboard.
+
+```
+  Step 1 — Double-tap ⌘ (or Ctrl on Win/Linux)
+  ┌──────────────────────────────────────────────────────────────┐
+  │                                                              │
+  │                       Listening...                           │
+  │                                                              │
+  └──▬▬▬▬▬▬▬▬▬▬▬▬▬ soft green glow at the bottom ▬▬▬▬▬▬▬▬▬▬▬▬──┘
+
+  Step 2 — Speak. Live text streams in as you talk.
+  ┌──────────────────────────────────────────────────────────────┐
+  │                                                              │
+  │       "let's ship this feature by friday"  ...               │
+  │                                                              │
+  └──▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬──┘
+
+  Step 3 — Single-tap ⌘ (or Ctrl). Final text pastes at your cursor.
+  ┌──────────────────────────────────────────────────────────────┐
+  │                                                              │
+  │     "Let's ship this feature by Friday."  ✓                  │
+  │                                                              │
+  └──────────────────── green flash ─────────────────────────────┘
+```
+
+---
+
+## The flow
+
+```mermaid
+sequenceDiagram
+    participant U as You
+    participant K as Keyboard hook
+    participant M as Microphone
+    participant G as Groq Whisper
+    participant A as Your app
+
+    U->>K: Double-tap ⌘ / Ctrl
+    K->>M: Start capture
+    Note over M: Live preview every 2s
+    M->>G: Stream audio chunks
+    G-->>K: "let's ship..."
+    U->>K: Single tap ⌘ / Ctrl
+    K->>M: Stop
+    M->>G: Final audio
+    G-->>K: "Let's ship this feature by Friday."
+    K->>A: Paste at cursor (⌘V / Ctrl+V)
+```
+
+---
 
 ## Install
 
-### Option 1 — prebuilt macOS app (easiest)
+Pick your OS:
 
-Grab `STT-macOS.zip` from the [latest release](../../releases/latest), unzip, drag `STT.app` into `/Applications`. First launch will ask for your Groq API key.
+<table>
+<tr>
+<td width="33%" valign="top">
 
-macOS will warn about an unsigned app — right-click → Open → Open, or run:
+### 🍎 macOS
+
+**Easiest — download .app:**
+
+1. Grab [`STT-macOS.zip`](../../releases/latest) from releases
+2. Unzip → drag `STT.app` to `/Applications`
+3. Right-click → **Open** (bypasses unsigned warning)
+4. Paste your [Groq API key](https://console.groq.com/keys)
+5. Allow **Mic** + **Accessibility** in System Settings
+
+**From source:**
 ```bash
-xattr -dr com.apple.quarantine /Applications/STT.app
-```
-
-### Option 2 — from source (macOS)
-
-```bash
-git clone https://github.com/murataslan1/stt.git
+git clone https://github.com/murataslan1/stt
 cd stt/macos
-./install.sh           # installs Python deps
-python3 stt.py         # or double-click STT.app
+./install.sh
+python3 stt.py
 ```
 
-Grant **Accessibility** and **Microphone** permission when prompted:
-System Settings → Privacy & Security → Accessibility → add Terminal (or STT.app).
+</td>
+<td width="33%" valign="top">
 
-### Option 3 — Windows (from source)
+### 🪟 Windows
 
+**From source:**
 ```cmd
-git clone https://github.com/murataslan1/stt.git
+git clone https://github.com/murataslan1/stt
 cd stt\windows
 pip install -r requirements.txt
 python stt_windows.py
 ```
 
-Or build a standalone `.exe`:
+**Build standalone .exe:**
 ```cmd
 build.bat
 ```
-The resulting `dist\STT.exe` is self-contained — double-click to run.
+→ `dist\STT.exe` is self-contained. Double-click to run.
 
-### Option 4 — Linux (from source)
+</td>
+<td width="33%" valign="top">
+
+### 🐧 Linux
 
 ```bash
-git clone https://github.com/murataslan1/stt.git
+git clone https://github.com/murataslan1/stt
 cd stt/linux
-./install.sh            # installs python-tk, portaudio, xclip, xdotool + pip deps
+./install.sh
 python3 stt_linux.py
 ```
 
-Or per-distro manually:
-```bash
-# Debian/Ubuntu
-sudo apt install python3-tk portaudio19-dev xclip xdotool
-# Fedora
-sudo dnf install python3-tkinter portaudio-devel xclip xdotool
-# Arch
-sudo pacman -S tk portaudio xclip xdotool
+Handles apt / dnf / pacman automatically.
 
-pip install --user -r requirements.txt
-python3 stt_linux.py
-```
+**X11 works out of the box.** Wayland: see caveats below.
 
-**Wayland note**: `pynput` can't capture global key events on most Wayland compositors. Workarounds: (1) use an X11 session, (2) run under XWayland (GNOME/KDE do this for X11 apps automatically — but the global listener still needs X), or (3) bind a compositor shortcut that runs `pkill -USR1 python3` or similar to trigger recording. The paste side auto-detects Wayland and uses `wl-copy` + `wtype` / `ydotool` if available.
+</td>
+</tr>
+</table>
 
-## API key
-
-On first launch, a dialog asks for a Groq API key. Get one free at [console.groq.com/keys](https://console.groq.com/keys).
-
-The key is stored in `~/.config/stt/settings.json` (both platforms). You can also set `GROQ_API_KEY` as an env var.
-
-If you skip the key on macOS, the app falls back to local MLX Whisper (downloads ~1.5GB model on first run; no network needed after).
+---
 
 ## Usage
 
-| Action | macOS | Windows | Linux |
+| | macOS | Windows | Linux |
+|---|:---:|:---:|:---:|
+| **Start** recording | Double-tap `⌘` | Double-tap `Ctrl` | Double-tap `Ctrl` |
+| **Stop** & paste | Single-tap `⌘` | Single-tap `Ctrl` | Single-tap `Ctrl` |
+
+That's it. No menu, no clicks. Just the key.
+
+The menu bar (macOS) lets you toggle between **Groq** (fast, cloud) and **Local** (offline MLX) mode or change your API key.
+
+---
+
+## API key
+
+First launch shows this:
+
+```
+┌─────────────────────────────────────────┐
+│  Welcome to STT                         │
+│                                         │
+│  Enter your Groq API key                │
+│  (free at console.groq.com/keys)        │
+│                                         │
+│  ┌───────────────────────────────────┐  │
+│  │ gsk_...                           │  │
+│  └───────────────────────────────────┘  │
+│                                         │
+│           [ Save & Start ]              │
+└─────────────────────────────────────────┘
+```
+
+Key is stored at `~/.config/stt/settings.json` (chmod 600 recommended). You can also set `GROQ_API_KEY` as an env var.
+
+**Get a free key:** https://console.groq.com/keys (takes 30 seconds)
+
+Skip the key? macOS falls back to local MLX Whisper (downloads ~1.5GB once, runs fully offline).
+
+---
+
+## Architecture
+
+```mermaid
+flowchart LR
+    A[Double-tap<br/>detection] --> B{Recording?}
+    B -->|no| C[Start<br/>InputStream]
+    B -->|yes| D[Stop &<br/>transcribe]
+    C --> E[Bottom-bar<br/>overlay]
+    C --> F[Live loop<br/>every 2s]
+    F -->|Groq API| G[Live text]
+    G --> E
+    D -->|Groq API| H[Final text]
+    H --> I[Clipboard]
+    I --> J[Synthesize<br/>⌘V / Ctrl+V]
+    J --> K[Paste at<br/>cursor ✓]
+```
+
+**Key files per platform:**
+
+| Piece | macOS | Windows | Linux |
 |---|---|---|---|
-| Start recording | Double-tap ⌘ | Double-tap Ctrl | Double-tap Ctrl |
-| Stop & paste | Single-tap ⌘ | Single-tap Ctrl | Single-tap Ctrl |
+| Entry | [`macos/stt.py`](macos/stt.py) | [`windows/stt_windows.py`](windows/stt_windows.py) | [`linux/stt_linux.py`](linux/stt_linux.py) |
+| Key hook | `NSEvent.addGlobalMonitor` | `pynput` | `pynput` (X11) |
+| Overlay | AppKit `NSWindow` | Tkinter `Canvas` | Tkinter `Canvas` |
+| Clipboard | `NSPasteboard` | `pyperclip` | `xclip` / `wl-copy` |
+| Paste key | `Quartz.CGEvent` ⌘V | `pynput` Ctrl+V | `xdotool` / `wtype` |
 
-The menu bar icon (macOS) lets you switch between Groq and local mode, or update the API key.
+---
 
-## Customization
+## Tweaking
 
-All configurable values live at the top of `stt.py` / `stt_windows.py`:
+Open the entry file for your OS — config is at the top:
 
-- `DOUBLE_TAP_WINDOW` — max seconds between taps (default 0.4)
-- `LIVE_INTERVAL` — how often live transcription refreshes (default 2.0s)
-- `PREVIEW_LINGER` — how long the final text stays visible (default 3.0s)
-- `MODEL` (macOS) — MLX model for local mode
-- `GROQ_MODEL` — Groq model; default is `whisper-large-v3-turbo`
+```python
+DOUBLE_TAP_WINDOW = 0.4   # max seconds between taps
+LIVE_INTERVAL = 2.0       # live transcription refresh
+PREVIEW_LINGER = 3.0      # how long final text stays on screen
+GROQ_MODEL = "whisper-large-v3-turbo"
+```
 
-Want a different hotkey? Change `CMD_FLAG` (macOS) or the `keyboard.Key.ctrl*` checks (Windows) in the event handler.
+**Different hotkey?** Change the key check in `handle_event` (macOS) or `_key_listener` (Win/Linux).
 
-Want a different STT backend? Replace `transcribe_audio()` — it takes a numpy float32 array and returns a string.
+**Different STT engine?** Replace `transcribe_audio()` — takes a numpy float32 array, returns a string.
 
-## Structure
+---
+
+## Troubleshooting
+
+<details>
+<summary><b>macOS: nothing happens when I double-tap ⌘</b></summary>
+
+Grant **Accessibility** permission:
+System Settings → Privacy & Security → Accessibility → toggle on for `STT.app` (or Terminal if running from source).
+
+Then restart the app.
+</details>
+
+<details>
+<summary><b>macOS: "STT.app is damaged and can't be opened"</b></summary>
+
+Gatekeeper is blocking the unsigned app. Run once:
+```bash
+xattr -dr com.apple.quarantine /Applications/STT.app
+```
+</details>
+
+<details>
+<summary><b>Linux Wayland: key hook doesn't fire</b></summary>
+
+`pynput` can't grab global keys on most Wayland compositors by design. Options:
+
+1. **Switch to X11 session** at login (GDM/SDDM session picker).
+2. **Use a compositor shortcut** → bind `Super+Space` (or whatever) to `kill -USR1 $(pgrep -f stt_linux.py)` and patch the script to toggle on that signal.
+3. **Run under Xorg** — most distros still ship an X session.
+
+The *paste* side works fine on Wayland (uses `wl-copy` + `wtype` / `ydotool`).
+</details>
+
+<details>
+<summary><b>Live transcription is blank / errors in logs</b></summary>
+
+Probably an invalid Groq key. Menu bar → **Set Groq API Key...** (macOS), or edit `~/.config/stt/settings.json` directly.
+</details>
+
+<details>
+<summary><b>Audio is too quiet / not picking up</b></summary>
+
+Check default input device: macOS System Settings → Sound → Input; Windows Sound panel; Linux `pavucontrol`. `sounddevice` uses the system default.
+</details>
+
+---
+
+## Privacy
+
+- Audio streams to **Groq** only while you're recording. Nothing persists server-side (per Groq's privacy policy).
+- Local MLX mode (macOS) keeps audio **on-device**. Zero network.
+- Only your API key is stored on disk (`~/.config/stt/settings.json`).
+
+---
+
+## Project layout
 
 ```
 stt/
 ├── macos/
-│   ├── stt.py               # main app
-│   ├── requirements.txt
+│   ├── stt.py                    Main app (AppKit + MLX fallback)
+│   ├── STT.app/                  Double-clickable wrapper
 │   ├── install.sh
-│   └── STT.app/             # double-clickable launcher
+│   └── requirements.txt
 ├── windows/
-│   ├── stt_windows.py
-│   ├── requirements.txt
-│   └── build.bat            # builds standalone .exe
+│   ├── stt_windows.py            Main app (Tkinter + pynput)
+│   ├── build.bat                 PyInstaller → standalone .exe
+│   └── requirements.txt
 └── linux/
-    ├── stt_linux.py
-    ├── requirements.txt
-    ├── install.sh
-    └── stt.desktop          # menu/launcher entry
+    ├── stt_linux.py              Main app (Tkinter + pynput)
+    ├── install.sh                apt / dnf / pacman auto-detect
+    ├── stt.desktop               Menu entry
+    └── requirements.txt
 ```
 
-## Privacy
-
-- Audio is sent to Groq only while recording.
-- Nothing is stored on disk except the API key in `settings.json`.
-- Local MLX mode (macOS) keeps everything on-device.
+---
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+[MIT](LICENSE) — do whatever, attribution appreciated.
+
+Contributions welcome. If you build a Windows/Linux binary, open a PR or attach it to the release.
