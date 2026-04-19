@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=STT
+GenericName=Speech to Text
+Comment=Voice dictation — double-tap Ctrl to record, single tap to paste
+Exec=python3 %h/.local/share/stt/stt_linux.py
+Icon=audio-input-microphone
+Terminal=false
+Categories=Utility;AudioVideo;
+Keywords=speech;dictation;voice;transcribe;whisper;
+StartupNotify=false
