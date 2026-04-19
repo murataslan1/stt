@@ -1,0 +1,29 @@
+#!/bin/bash
+# STT launcher - finds Python automatically
+set -e
+
+DIR="$(cd "$(dirname "$0")/../Resources" && pwd)"
+
+# Source shell profile for PATH / env vars (GROQ_API_KEY etc.)
+[ -f "$HOME/.zshrc" ] && source "$HOME/.zshrc" 2>/dev/null || true
+[ -f "$HOME/.bash_profile" ] && source "$HOME/.bash_profile" 2>/dev/null || true
+
+# Find a usable python3
+PYTHON=""
+for candidate in \
+    "/opt/homebrew/bin/python3" \
+    "/usr/local/bin/python3" \
+    "$(command -v python3 2>/dev/null)" \
+    "/usr/bin/python3"; do
+    if [ -x "$candidate" ]; then
+        PYTHON="$candidate"
+        break
+    fi
+done
+
+if [ -z "$PYTHON" ]; then
+    osascript -e 'display alert "STT" message "Python 3 not found. Install it with:\n\nbrew install python"'
+    exit 1
+fi
+
+exec "$PYTHON" "$DIR/stt.py"

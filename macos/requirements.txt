@@ -1,0 +1,6 @@
+groq
+numpy
+sounddevice
+pyobjc-core
+pyobjc-framework-Cocoa
+pyobjc-framework-Quartz

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleName</key>
+    <string>STT</string>
+    <key>CFBundleDisplayName</key>
+    <string>STT - Speech to Text</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.murataslan1.stt</string>
+    <key>CFBundleVersion</key>
+    <string>1.0</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0</string>
+    <key>CFBundleExecutable</key>
+    <string>run</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>LSUIElement</key>
+    <true/>
+    <key>NSHighResolutionCapable</key>
+    <true/>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>STT needs microphone access to transcribe your speech.</string>
+    <key>NSAppleEventsUsageDescription</key>
+    <string>STT needs accessibility to paste transcribed text at your cursor.</string>
+</dict>
+</plist>

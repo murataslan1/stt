@@ -1,0 +1,19 @@
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store
+.vscode/
+.idea/
+*.swp
+
+# PyInstaller build artifacts
+build/
+dist/
+*.spec
+
+# User settings (contains API key)
+settings.json
+.env
+
+# Logs
+*.log
